@@ -7,4 +7,5 @@
     <string name="tv_temp_min">8°</string>
     <string name="tv_weather_type">Cloudy</string>
     <string name="tv_today_weather">Today - Sunny - 88/63</string>
+    <string name="action_refresh">Refresh</string>
 </resources>
