@@ -2,4 +2,9 @@
     <string name="app_name">Sunshine</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="tv_today_date">Today, June 24</string>
+    <string name="tv_temp_max">21°</string>
+    <string name="tv_temp_min">8°</string>
+    <string name="tv_weather_type">Cloudy</string>
+    <string name="tv_today_weather">Today - Sunny - 88/63</string>
 </resources>
