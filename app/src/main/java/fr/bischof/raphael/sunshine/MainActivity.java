@@ -1,5 +1,9 @@
 package fr.bischof.raphael.sunshine;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -30,9 +34,23 @@ public class MainActivity extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent i = new Intent(this,SettingsActivity.class);
+            startActivity(i);
             return true;
+        }else if (id == R.id.action_set_location){
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            Uri uri = Uri.parse("geo:0,0?q="+preferences.getString(getString(R.string.pref_location_key),getString(R.string.pref_location_default)));
+            showMap(uri);
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void showMap(Uri geoLocation) {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(geoLocation);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
     }
 }

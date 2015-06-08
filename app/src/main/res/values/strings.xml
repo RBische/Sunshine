@@ -8,4 +8,7 @@
     <string name="tv_weather_type">Cloudy</string>
     <string name="tv_today_weather">Today - Sunny - 88/63</string>
     <string name="action_refresh">Refresh</string>
+    <string name="title_activity_detail">Weather of the day</string>
+    <string name="pref_units_default">Metric</string>
+    <string name="action_set_location">View location</string>
 </resources>

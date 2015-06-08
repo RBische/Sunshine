@@ -1,7 +1,9 @@
 package fr.bischof.raphael.sunshine;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.text.format.Time;
@@ -12,6 +14,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -33,6 +36,7 @@ import java.util.ArrayList;
  */
 public class ForecastFragment extends Fragment {
     private ListView lvForecast;
+    private ArrayAdapter<String> mForecastAdapter;
 
     public ForecastFragment() {
     }
@@ -48,12 +52,27 @@ public class ForecastFragment extends Fragment {
                              Bundle savedInstanceState) {
         View v =  inflater.inflate(R.layout.fragment_main, container, false);
         this.lvForecast = ((ListView)v.findViewById(R.id.listview_forecast));
-        loadDatas();
+        this.lvForecast.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (mForecastAdapter!=null){
+                    Intent i = new Intent(getActivity(),DetailActivity.class);
+                    i.putExtra(Intent.EXTRA_TEXT,mForecastAdapter.getItem(position));
+                    startActivity(i);
+                }
+            }
+        });
         return v;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        loadDatas();
+    }
+
     private void loadDatas() {
-        new FetchWeatherTask().execute("94043");
+        new FetchWeatherTask().execute(PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(getString(R.string.pref_location_key),getString(R.string.pref_location_default)));
     }
 
     @Override
@@ -73,7 +92,7 @@ public class ForecastFragment extends Fragment {
 
     public class FetchWeatherTask extends AsyncTask<String,Void,String[]>{
 
-        private static final String LOG_TAG = "PARSING";
+        private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
 
         @Override
         protected String[] doInBackground(String... params) {
@@ -132,7 +151,7 @@ public class ForecastFragment extends Fragment {
                 forecastJsonStr = buffer.toString();
                 return getWeatherDataFromJson(forecastJsonStr,7);
             } catch (IOException e) {
-                Log.e("PlaceholderFragment", "Error ", e);
+                Log.e(LOG_TAG, "Error ", e);
                 // If the code didn't successfully get the weather data, there's no point in attempting
                 // to parse it.
                 forecastJsonStr = null;
@@ -146,7 +165,7 @@ public class ForecastFragment extends Fragment {
                     try {
                         reader.close();
                     } catch (final IOException e) {
-                        Log.e("PlaceholderFragment", "Error closing stream", e);
+                        Log.e(LOG_TAG, "Error closing stream", e);
                     }
                 }
             }
@@ -240,7 +259,10 @@ public class ForecastFragment extends Fragment {
                 JSONObject temperatureObject = dayForecast.getJSONObject(OWM_TEMPERATURE);
                 double high = temperatureObject.getDouble(OWM_MAX);
                 double low = temperatureObject.getDouble(OWM_MIN);
-
+                if (!PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(getString(R.string.pref_units_key),getResources().getStringArray(R.array.pref_units_keys)[0]).equalsIgnoreCase("metric")){
+                    high = high* 9/5 + 32;
+                    low  = low* 9/5 + 32;
+                }
                 highAndLow = formatHighLows(high, low);
                 resultStrs[i] = day + " - " + description + " - " + highAndLow;
             }
@@ -254,7 +276,8 @@ public class ForecastFragment extends Fragment {
             super.onPostExecute(strings);
             if (strings!=null)
             {
-                lvForecast.setAdapter(new ArrayAdapter<String>(getActivity(),R.layout.list_item_forecast,R.id.list_item_forecast_textview,strings));
+                mForecastAdapter = new ArrayAdapter<String>(getActivity(),R.layout.list_item_forecast,R.id.list_item_forecast_textview,strings);
+                lvForecast.setAdapter(mForecastAdapter);
             }
         }
     }
