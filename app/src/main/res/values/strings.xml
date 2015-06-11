@@ -11,4 +11,6 @@
     <string name="title_activity_detail">Weather of the day</string>
     <string name="pref_units_default">Metric</string>
     <string name="action_set_location">View location</string>
+    <string name="pref_units_metric">qsdqf</string>
+    <string name="pref_units_imperial">qsdfqsd</string>
 </resources>
