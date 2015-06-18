@@ -20,6 +20,7 @@ import android.database.Cursor;
 import android.test.AndroidTestCase;
 
 import fr.bischof.raphael.sunshine.data.WeatherContract;
+import fr.bischof.raphael.sunshine.data.WeatherDbHelper;
 
 public class TestFetchWeatherTask extends AndroidTestCase{
     static final String ADD_LOCATION_SETTING = "Sunnydale, CA";
@@ -27,11 +28,23 @@ public class TestFetchWeatherTask extends AndroidTestCase{
     static final double ADD_LOCATION_LAT = 34.425833;
     static final double ADD_LOCATION_LON = -119.714167;
 
+
+    // Since we want each test to start with a clean slate
+    void deleteTheDatabase() {
+        mContext.deleteDatabase(WeatherDbHelper.DATABASE_NAME);
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        deleteTheDatabase();
+    }
+
     /*
-        Students: uncomment testAddLocation after you have written the AddLocation function.
-        This test will only run on API level 11 and higher because of a requirement in the
-        content provider.
-     */
+            Students: uncomment testAddLocation after you have written the AddLocation function.
+            This test will only run on API level 11 and higher because of a requirement in the
+            content provider.
+         */
     @TargetApi(11)
     public void testAddLocation() {
         // start from a clean state
@@ -39,7 +52,7 @@ public class TestFetchWeatherTask extends AndroidTestCase{
                 WeatherContract.LocationEntry.COLUMN_LOCATION_SETTING + " = ?",
                 new String[]{ADD_LOCATION_SETTING});
 
-        FetchWeatherTask fwt = new FetchWeatherTask(getContext(), null);
+        FetchWeatherTask fwt = new FetchWeatherTask(getContext());
         long locationId = fwt.addLocation(ADD_LOCATION_SETTING, ADD_LOCATION_CITY,
                 ADD_LOCATION_LAT, ADD_LOCATION_LON);
 

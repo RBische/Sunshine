@@ -82,6 +82,8 @@ public class WeatherProvider extends ContentProvider {
         } else {
             selectionArgs = new String[]{locationSetting, Long.toString(startDate)};
             selection = sLocationSettingWithStartDateSelection;
+            //selectionArgs = null;
+            //selection = null;
         }
 
         return sWeatherByLocationSettingQueryBuilder.query(mOpenHelper.getReadableDatabase(),
@@ -356,7 +358,6 @@ public class WeatherProvider extends ContentProvider {
                 return super.bulkInsert(uri, values);
         }
     }
-
     // You do not need to call this method. This is a method specifically to assist the testing
     // framework in running smoothly. You can read more at:
     // http://developer.android.com/reference/android/content/ContentProvider.html#shutdown()
