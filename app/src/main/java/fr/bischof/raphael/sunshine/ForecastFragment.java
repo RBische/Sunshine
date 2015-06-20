@@ -25,6 +25,7 @@ import fr.bischof.raphael.sunshine.data.WeatherContract;
  */
 public class ForecastFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final int FORECAST_LOADER = 101;
+    private int mPosition = ListView.INVALID_POSITION;
     public static final String[] FORECAST_COLUMNS = {
             // In this case the id needs to be fully qualified with a table name, since
             // the content provider joins the location & weather tables in the background
@@ -54,6 +55,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     static final int COL_WEATHER_CONDITION_ID = 6;
     static final int COL_COORD_LAT = 7;
     static final int COL_COORD_LONG = 8;
+    private static final String SAVE_SCROLL_POSITION = "scrollPosition";
     private ListView lvForecast;
     private ForecastAdapter mForecastAdapter;
     private Loader<Cursor> mCursorLoader;
@@ -78,15 +80,15 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (mForecastAdapter!=null){
+                    mPosition = position;
                     // CursorAdapter returns a cursor at the correct position for getItem(), or null
                     // if it cannot seek to that position.
                     Cursor cursor = (Cursor) parent.getItemAtPosition(position);
                     if (cursor != null) {
-                        Intent intent = new Intent(getActivity(), DetailActivity.class)
-                                .setData(WeatherContract.WeatherEntry.buildWeatherLocationWithDate(
-                                        mLocation, cursor.getLong(COL_WEATHER_DATE)
-                                ));
-                        startActivity(intent);
+                        if (getActivity() instanceof ForecastFragmentCallbacks){
+                            ForecastFragmentCallbacks forecastFragmentCallbacks = (ForecastFragmentCallbacks)getActivity();
+                            forecastFragmentCallbacks.onListItemClicked(WeatherContract.WeatherEntry.buildWeatherLocationWithDate(mLocation, cursor.getLong(COL_WEATHER_DATE)));
+                        }
                     }
                     /*Intent i = new Intent(getActivity(),DetailActivity.class);
                     i.putExtra(Intent.EXTRA_TEXT,mForecastAdapter.getItem(position));
@@ -94,6 +96,16 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                 }
             }
         });
+        // If there's instance state, mine it for useful information.
+        // The end-goal here is that the user never knows that turning their device sideways
+        // does crazy lifecycle related things.  It should feel like some stuff stretched out,
+        // or magically appeared to take advantage of room, but data or place in the app was never
+        // actually *lost*.
+        if (savedInstanceState != null && savedInstanceState.containsKey(SAVE_SCROLL_POSITION)) {
+            // The listview probably hasn't even been populated yet.  Actually perform the
+            // swapout in onLoadFinished.
+            mPosition = savedInstanceState.getInt(SAVE_SCROLL_POSITION);
+        }
         return v;
     }
 
@@ -104,6 +116,14 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         this.mCursorLoader = getLoaderManager().initLoader(FORECAST_LOADER,null,this);
         this.lvForecast.setAdapter(mForecastAdapter);
         loadDatas();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (mPosition != ListView.INVALID_POSITION) {
+            outState.putInt(SAVE_SCROLL_POSITION,mPosition);
+        }
     }
 
     private void loadDatas() {
@@ -142,6 +162,11 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mForecastAdapter.swapCursor(data);
+        if (mPosition != ListView.INVALID_POSITION) {
+            // If we don't need to restart the loader, and there's a desired position to restore
+            // to, do so now.
+            lvForecast.smoothScrollToPosition(mPosition);
+        }
     }
 
     @Override
@@ -153,5 +178,11 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         mLocation = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default));
         loadDatas();
         getLoaderManager().restartLoader(FORECAST_LOADER, null, this);
+    }
+
+    public void setUseTodayLayout(boolean useTodayLayout) {
+        if (mForecastAdapter != null) {
+            mForecastAdapter.setUseTodayLayout(useTodayLayout);
+        }
     }
 }
