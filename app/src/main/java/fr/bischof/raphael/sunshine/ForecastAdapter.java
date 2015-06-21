@@ -23,7 +23,7 @@ import fr.bischof.raphael.sunshine.data.WeatherContract;
  * Created by biche on 17/06/2015.
  */
 public class ForecastAdapter extends CursorAdapter {
-    private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
+    private final String LOG_TAG = ForecastAdapter.class.getSimpleName();
     private Context mContext;
     private boolean mShowTodayItem = false;
     public ForecastAdapter(Context context, Cursor c, boolean autoRequery) {

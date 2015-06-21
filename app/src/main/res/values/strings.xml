@@ -7,7 +7,7 @@
     <string name="tv_temp_min">8°</string>
     <string name="tv_weather_type">Cloudy</string>
     <string name="tv_today_weather">Today - Sunny - 88/63</string>
-    <string name="action_refresh">Refresh</string>
+    <string name="action_rmap">View location</string>
     <string name="title_activity_detail">Weather of the day</string>
     <string name="pref_units_default">Metric</string>
     <string name="action_set_location">View location</string>
@@ -41,4 +41,15 @@
 
     <!-- Humidity format CHAR LIMIT=25]-->
     <string name="format_humidity">Humidity: <xliff:g id="humidity">%1.0f</xliff:g> %%</string>
+
+    <!-- SyncAdapter related -->
+    <string name="sync_account_type">sunshine.raphaelbischof.fr</string>
+    <string name="content_authority">fr.bischof.raphael.sunshine</string>
+    <!-- Notification Format -->
+    <string name="format_notification">
+    Forecast: <xliff:g id="condition">%1$s</xliff:g> High: <xliff:g id="high">%2$s</xliff:g> Low: <xliff:g id="low">%3$s</xliff:g>
+    </string>
+    <!-- Strings related to Notification preference -->
+    <string name="pref_last_notification">last_notification
+    </string>
 </resources>

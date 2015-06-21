@@ -9,6 +9,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import fr.bischof.raphael.sunshine.sync.SunshineSyncAdapter;
+
 public class MainActivity extends AppCompatActivity implements ForecastFragmentCallbacks {
     private static final String DETAILFRAGMENT_TAG = "DetailFragment";
     private String mLocation;
@@ -37,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements ForecastFragmentC
         ForecastFragment forecastFragment =  ((ForecastFragment)getSupportFragmentManager()
                 .findFragmentById(R.id.fragment_forecast));
         forecastFragment.setUseTodayLayout(!mTwoPane);
+        SunshineSyncAdapter.initializeSyncAdapter(this);
         mLocation = PreferenceManager.getDefaultSharedPreferences(this).getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default));
     }
 
@@ -73,21 +76,9 @@ public class MainActivity extends AppCompatActivity implements ForecastFragmentC
             Intent i = new Intent(this,SettingsActivity.class);
             startActivity(i);
             return true;
-        }else if (id == R.id.action_set_location){
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-            Uri uri = Uri.parse("geo:0,0?q="+preferences.getString(getString(R.string.pref_location_key),getString(R.string.pref_location_default)));
-            showMap(uri);
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    public void showMap(Uri geoLocation) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(geoLocation);
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
-        }
     }
 
     @Override
