@@ -188,10 +188,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-
-        String sortOrder = WeatherContract.WeatherEntry.COLUMN_DATE+" DESC";
+        String sortOrder = WeatherContract.WeatherEntry.COLUMN_DATE+" ASC";
         Uri weatherForLocationUri = WeatherContract.WeatherEntry.buildWeatherLocationWithStartDate(mLocation, System.currentTimeMillis());
-
         return new CursorLoader(getActivity(),
                 weatherForLocationUri,
                 FORECAST_COLUMNS,
@@ -260,6 +258,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             int locationStatus = Utility.getLocationStatus(getActivity());
             if (locationStatus == SunshineSyncAdapter.LOCATION_STATUS_UNKNOWN){
                 mTvEmpty.setText(getString(R.string.empty_string));
+            }else if (locationStatus==SunshineSyncAdapter.LOCATION_STATUS_INVALID){
+                mTvEmpty.setText(getString(R.string.empty_forecast_list_invalid_location));
             }else{
                 mTvEmpty.setText(getString(R.string.no_connection));
             }

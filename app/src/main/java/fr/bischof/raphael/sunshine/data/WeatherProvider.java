@@ -196,7 +196,7 @@ public class WeatherProvider extends ContentProvider {
             }
             // "location"
             case LOCATION: {
-                retCursor = getLocation(uri, projection, sortOrder);
+                retCursor = getLocation(uri, projection, selection, selectionArgs, sortOrder);
                 break;
             }
 
@@ -207,12 +207,12 @@ public class WeatherProvider extends ContentProvider {
         return retCursor;
     }
 
-    private Cursor getLocation(Uri uri, String[] projection, String sortOrder) {
+    private Cursor getLocation(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         final SQLiteDatabase db = mOpenHelper.getReadableDatabase();
         return db.query(WeatherContract.LocationEntry.TABLE_NAME,
                 projection,
-                null,
-                null,
+                selection,
+                selectionArgs,
                 null,
                 null,
                 sortOrder

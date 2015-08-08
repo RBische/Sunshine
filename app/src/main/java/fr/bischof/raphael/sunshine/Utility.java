@@ -238,7 +238,13 @@ public class Utility {
     @SuppressWarnings("ResourceType")
     @SunshineSyncAdapter.LOCATION_STATUS
     public static int getLocationStatus(Context context){
-        int ret = PreferenceManager.getDefaultSharedPreferences(context).getInt(context.getString(R.string.pref_location_status),SunshineSyncAdapter.LOCATION_STATUS_UNKNOWN);
+        int ret = PreferenceManager.getDefaultSharedPreferences(context).getInt(context.getString(R.string.pref_location_status), SunshineSyncAdapter.LOCATION_STATUS_UNKNOWN);
         return ret;
+    }
+
+    public static void resetLocationStatus(Context context){
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        editor.putInt(context.getString(R.string.pref_location_status), SunshineSyncAdapter.LOCATION_STATUS_UNKNOWN);
+        editor.commit();
     }
 }
