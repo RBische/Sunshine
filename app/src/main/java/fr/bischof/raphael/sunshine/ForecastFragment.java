@@ -1,8 +1,11 @@
 package fr.bischof.raphael.sunshine;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -19,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import fr.bischof.raphael.sunshine.data.WeatherContract;
 import fr.bischof.raphael.sunshine.sync.SunshineSyncAdapter;
@@ -26,7 +30,7 @@ import fr.bischof.raphael.sunshine.sync.SunshineSyncAdapter;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class ForecastFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class ForecastFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, SharedPreferences.OnSharedPreferenceChangeListener {
     private static final int FORECAST_LOADER = 101;
     private static final String LOG_TAG = ForecastFragment.class.getSimpleName();
     private int mPosition = ListView.INVALID_POSITION;
@@ -64,6 +68,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     private ForecastAdapter mForecastAdapter;
     private Loader<Cursor> mCursorLoader;
     private String mLocation;
+    private boolean mUseTodayLayout = false;
+    private TextView mTvEmpty;
 
     public ForecastFragment() {
     }
@@ -80,6 +86,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                              Bundle savedInstanceState) {
         View v =  inflater.inflate(R.layout.fragment_main, container, false);
         this.lvForecast = ((ListView)v.findViewById(R.id.listview_forecast));
+        this.mTvEmpty = (TextView)v.findViewById(R.id.tvEmpty);
+        this.lvForecast.setEmptyView(mTvEmpty);
         this.lvForecast.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -117,6 +125,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         this.mForecastAdapter = new ForecastAdapter(getActivity(),null,0);
+        this.mForecastAdapter.setUseTodayLayout(mUseTodayLayout);
         this.mCursorLoader = getLoaderManager().initLoader(FORECAST_LOADER,null,this);
         this.lvForecast.setAdapter(mForecastAdapter);
     }
@@ -193,6 +202,19 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        if (data.getCount()==0){
+            ConnectivityManager cm =
+                    (ConnectivityManager)getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+            boolean isConnected = activeNetwork != null &&
+                    activeNetwork.isConnectedOrConnecting();
+            if (!isConnected){
+                mTvEmpty.setText(getString(R.string.no_connection));
+            }else{
+                mTvEmpty.setText(getString(R.string.empty_string));
+            }
+        }
         mForecastAdapter.swapCursor(data);
         if (mPosition != ListView.INVALID_POSITION) {
             // If we don't need to restart the loader, and there's a desired position to restore
@@ -216,6 +238,31 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     public void setUseTodayLayout(boolean useTodayLayout) {
         if (mForecastAdapter != null) {
             mForecastAdapter.setUseTodayLayout(useTodayLayout);
+        }
+        mUseTodayLayout = useTodayLayout;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        PreferenceManager.getDefaultSharedPreferences(getActivity()).registerOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        PreferenceManager.getDefaultSharedPreferences(getActivity()).unregisterOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(getString(R.string.pref_location_status))){
+            int locationStatus = Utility.getLocationStatus(getActivity());
+            if (locationStatus == SunshineSyncAdapter.LOCATION_STATUS_UNKNOWN){
+                mTvEmpty.setText(getString(R.string.empty_string));
+            }else{
+                mTvEmpty.setText(getString(R.string.no_connection));
+            }
         }
     }
 }

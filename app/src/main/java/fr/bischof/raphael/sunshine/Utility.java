@@ -9,6 +9,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import fr.bischof.raphael.sunshine.sync.SunshineSyncAdapter;
+
 /**
  * Created by biche on 18/06/2015.
  */
@@ -231,5 +233,12 @@ public class Utility {
         SimpleDateFormat monthDayFormat = new SimpleDateFormat("MMMM dd");
         String monthDayString = monthDayFormat.format(dateInMillis);
         return monthDayString;
+    }
+
+    @SuppressWarnings("ResourceType")
+    @SunshineSyncAdapter.LOCATION_STATUS
+    public static int getLocationStatus(Context context){
+        int ret = PreferenceManager.getDefaultSharedPreferences(context).getInt(context.getString(R.string.pref_location_status),SunshineSyncAdapter.LOCATION_STATUS_UNKNOWN);
+        return ret;
     }
 }
