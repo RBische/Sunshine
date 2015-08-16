@@ -23,14 +23,24 @@ public class Utility {
 
     public static boolean isMetric(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        return prefs.getString(context.getString(R.string.pref_units_key),
-                context.getString(R.string.pref_units_metric))
-                .equals(context.getString(R.string.pref_units_metric));
+        String pref = prefs.getString(context.getString(R.string.pref_units_key),
+                context.getResources().getStringArray(R.array.pref_units_keys)[0]);
+        return pref.equals(context.getResources().getStringArray(R.array.pref_units_keys)[0]);
     }
 
     public static String formatTemperature(Context context, double temperature, boolean isMetric) {
         double temp;
         if ( !isMetric ) {
+            temp = 9*temperature/5+32;
+        } else {
+            temp = temperature;
+        }
+        return context.getString(R.string.format_temperature, temp);
+    }
+
+    public static String formatTemperature(Context context, double temperature) {
+        double temp;
+        if ( !isMetric(context) ) {
             temp = 9*temperature/5+32;
         } else {
             temp = temperature;

@@ -47,6 +47,8 @@ import fr.bischof.raphael.sunshine.data.WeatherContract;
 
 public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
 
+    public static final String ACTION_DATA_UPDATED = "com.example.android.sunshine.app.ACTION_DATA_UPDATED";
+
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({LOCATION_STATUS_OK, LOCATION_STATUS_SERVER_DOWN, LOCATION_STATUS_SERVER_INVALID,LOCATION_STATUS_UNKNOWN,LOCATION_STATUS_INVALID})
     public @interface LOCATION_STATUS {}
@@ -307,7 +309,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
                         WeatherContract.WeatherEntry.COLUMN_DATE + " <= ?",
                         new String[]{Long.toString(dayTime.setJulianDay(julianStartDay - 1))});
                 getContext().getContentResolver().bulkInsert(WeatherContract.WeatherEntry.CONTENT_URI, cvArray);
-
+                updateWidgets();
                 notifyWeather();
             }
 
@@ -550,6 +552,15 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
             WeatherContract.WeatherEntry.COLUMN_MIN_TEMP,
             WeatherContract.WeatherEntry.COLUMN_SHORT_DESC
     };
+
+    private void updateWidgets() {
+                Context context = getContext();
+                // Setting the package ensures that only components in our app will receive the broadcast
+                        Intent dataUpdatedIntent = new Intent(ACTION_DATA_UPDATED)
+                                .setPackage(context.getPackageName());
+                context.sendBroadcast(dataUpdatedIntent);
+            }
+    
     // these indices must match the projection
     private static final int INDEX_WEATHER_ID = 0;
     private static final int INDEX_MAX_TEMP = 1;

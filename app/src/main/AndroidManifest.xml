@@ -73,6 +73,27 @@
                 android:name="android.content.SyncAdapter"
                 android:resource="@xml/syncadapter" />
         </service>
+
+        <receiver android:name=".widget.TodayWidgetProvider" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="fr.bischof.raphael.sunshine.app.ACTION_DATA_UPDATED" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/widget_mini" />
+        </receiver>
+        <service android:name=".widget.TodayWidgetIntentService" />
+
+        <receiver android:name=".widget.DetailWidgetProvider" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="fr.bischof.raphael.sunshine.app.ACTION_DATA_UPDATED" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/widget_detail" />
+        </receiver>
+        <service android:name=".widget.DetailWidgetRemoteViewsService"
+                android:permission="android.permission.BIND_REMOTEVIEWS" />
     </application>
 
 </manifest>
