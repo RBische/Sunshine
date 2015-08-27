@@ -14,7 +14,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SyncRequest;
 import android.content.SyncResult;
+import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -24,6 +27,8 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.text.format.Time;
 import android.util.Log;
+
+import com.bumptech.glide.Glide;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -38,6 +43,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Vector;
+import java.util.concurrent.ExecutionException;
 
 import fr.bischof.raphael.sunshine.MainActivity;
 import fr.bischof.raphael.sunshine.R;
@@ -502,11 +508,32 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
 
                     // NotificationCompatBuilder is a very convenient way to build backward-compatible
                     // notifications.  Just throw in some data.
+                    Resources resources = context.getResources();
                     NotificationCompat.Builder mBuilder =
                             new NotificationCompat.Builder(getContext())
                                     .setSmallIcon(iconId)
                                     .setContentTitle(title)
                                     .setContentText(contentText);
+                    int largeIconWidth = Build.VERSION.SDK_INT>= Build.VERSION_CODES.HONEYCOMB
+                            ? resources.getDimensionPixelSize(android.R.dimen.notification_large_icon_width)
+                            : resources.getDimensionPixelSize(R.dimen.notification_large_icon_default);
+                    int largeIconHeight = Build.VERSION.SDK_INT>= Build.VERSION_CODES.HONEYCOMB
+                            ? resources.getDimensionPixelSize(android.R.dimen.notification_large_icon_height)
+                            : resources.getDimensionPixelSize(R.dimen.notification_large_icon_default);
+                    try{
+                        String artUrl = Utility.getArtUrlForWeatherCondition(context, weatherId);
+                        Bitmap btm = Glide.with(context)
+                                .load(artUrl)
+                                .asBitmap()
+                                .error(iconId)
+                                .into(largeIconWidth,largeIconHeight)
+                                .get();
+                        if (btm!=null){
+                            mBuilder.setLargeIcon(btm);
+                        }
+                    }catch (InterruptedException | ExecutionException e){
+
+                    }
 
                     // Make something interesting happen when the user clicks on the notification.
                     // In this case, opening the app is sufficient.

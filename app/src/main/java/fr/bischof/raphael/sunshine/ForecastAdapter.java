@@ -13,6 +13,8 @@ import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Vector;
@@ -74,20 +76,28 @@ public class ForecastAdapter extends CursorAdapter {
         // Read weather icon ID from cursor
         int weatherId = cursor.getInt(ForecastFragment.COL_WEATHER_ID);
         int viewType = getItemViewType(cursor.getPosition());
+        int fallbackIconId;
         switch (viewType) {
             case VIEW_TYPE_TODAY: {
                 // Get weather icon
-                viewHolder.iconView.setImageResource(Utility.getArtResourceForWeatherCondition(
-                        cursor.getInt(ForecastFragment.COL_WEATHER_CONDITION_ID)));
+                fallbackIconId = Utility.getArtResourceForWeatherCondition(
+                        weatherId);
                 break;
             }
-            case VIEW_TYPE_FUTURE_DAY: {
+            default: {
                 // Get weather icon
-                viewHolder.iconView.setImageResource(Utility.getIconResourceForWeatherCondition(
-                        cursor.getInt(ForecastFragment.COL_WEATHER_CONDITION_ID)));
+                fallbackIconId = Utility.getIconResourceForWeatherCondition(
+                        weatherId);
                 break;
             }
         }
+
+
+        Glide.with(mContext)
+                .load(Utility.getArtUrlForWeatherCondition(mContext, weatherId))
+                .error(fallbackIconId)
+                .crossFade()
+                .into(viewHolder.iconView);
 
         // Read date from cursor
         long dateString = cursor.getLong(ForecastFragment.COL_WEATHER_DATE);

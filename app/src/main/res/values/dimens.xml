@@ -25,5 +25,6 @@
          on devices that don't yet have Roboto -->
     <dimen name="forecast_widget_text_width">38dp</dimen>
     <dimen name="list_icon">40dp</dimen>
+    <dimen name="notification_large_icon_default">48dp</dimen>
 
 </resources>
