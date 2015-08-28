@@ -13,6 +13,12 @@
     <uses-permission
         android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
 
+    <!-- Permissions required for Google Cloud Messaging -->
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <permission android:name="fr.bischof.raphael.sunshine.app.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="fr.bischof.raphael.sunshine.app.permission.C2D_MESSAGE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -94,6 +100,16 @@
         </receiver>
         <service android:name=".widget.DetailWidgetRemoteViewsService"
                 android:permission="android.permission.BIND_REMOTEVIEWS" />
+
+        <!-- GCM receiver - Commented out until we write the class -->
+        <!--<receiver-->
+        <!--android:name=".GcmBroadcastReceiver"-->
+        <!--android:permission="com.google.android.c2dm.permission.SEND" >-->
+        <!--<intent-filter>-->
+        <!--<action android:name="com.google.android.c2dm.intent.RECEIVE" />-->
+        <!--<category android:name="fr.bischof.raphael.sunshine.app" />-->
+        <!--</intent-filter>-->
+        <!--</receiver>-->
     </application>
 
 </manifest>
