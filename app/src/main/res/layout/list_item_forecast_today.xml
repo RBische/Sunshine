@@ -2,11 +2,11 @@
 <!-- Layout for weather forecast list item for today -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="150dp"
     android:gravity="center_vertical"
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:orientation="horizontal"
-    android:background="@color/sunshine_blue"
+    android:background="@color/colorPrimary"
     android:padding="16dp">
 
     <LinearLayout
