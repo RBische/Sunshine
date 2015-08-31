@@ -13,6 +13,8 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -21,7 +23,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import fr.bischof.raphael.sunshine.data.WeatherContract;
@@ -33,7 +34,7 @@ import fr.bischof.raphael.sunshine.sync.SunshineSyncAdapter;
 public class ForecastFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, SharedPreferences.OnSharedPreferenceChangeListener {
     private static final int FORECAST_LOADER = 101;
     private static final String LOG_TAG = ForecastFragment.class.getSimpleName();
-    private int mPosition = ListView.INVALID_POSITION;
+    private int mPosition = RecyclerView.NO_POSITION;
     public static final String[] FORECAST_COLUMNS = {
             // In this case the id needs to be fully qualified with a table name, since
             // the content provider joins the location & weather tables in the background
@@ -64,7 +65,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     static final int COL_COORD_LAT = 7;
     static final int COL_COORD_LONG = 8;
     private static final String SAVE_SCROLL_POSITION = "scrollPosition";
-    private ListView lvForecast;
+    private RecyclerView lvForecast;
     private ForecastAdapter mForecastAdapter;
     private Loader<Cursor> mCursorLoader;
     private String mLocation;
@@ -85,9 +86,10 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v =  inflater.inflate(R.layout.fragment_main, container, false);
-        this.lvForecast = ((ListView)v.findViewById(R.id.listview_forecast));
+        this.lvForecast = ((RecyclerView)v.findViewById(R.id.listview_forecast));
         this.mTvEmpty = (TextView)v.findViewById(R.id.tvEmpty);
-        this.lvForecast.setEmptyView(mTvEmpty);
+        this.lvForecast.setLayoutManager(new LinearLayoutManager(getActivity()));
+        /*this.lvForecast.setEmptyView(mTvEmpty);
         this.lvForecast.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -102,12 +104,13 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                             forecastFragmentCallbacks.onListItemClicked(WeatherContract.WeatherEntry.buildWeatherLocationWithDate(mLocation, cursor.getLong(COL_WEATHER_DATE)));
                         }
                     }
-                    /*Intent i = new Intent(getActivity(),DetailActivity.class);
-                    i.putExtra(Intent.EXTRA_TEXT,mForecastAdapter.getItem(position));
-                    startActivity(i);*/
+                    //Intent i = new Intent(getActivity(),DetailActivity.class);
+                    //i.putExtra(Intent.EXTRA_TEXT,mForecastAdapter.getItem(position));
+                    //startActivity(i);
                 }
             }
         });
+                */
         // If there's instance state, mine it for useful information.
         // The end-goal here is that the user never knows that turning their device sideways
         // does crazy lifecycle related things.  It should feel like some stuff stretched out,
@@ -124,7 +127,17 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        this.mForecastAdapter = new ForecastAdapter(getActivity(),null,0);
+        this.mForecastAdapter = new ForecastAdapter(getActivity(), new ForecastAdapter.ForecastAdapterOnClickHandler() {
+            @Override
+            public void onClick(Long date, ForecastAdapter.ViewHolder vh) {
+                if (mForecastAdapter!=null){
+                    if (getActivity() instanceof ForecastFragmentCallbacks){
+                        ForecastFragmentCallbacks forecastFragmentCallbacks = (ForecastFragmentCallbacks)getActivity();
+                        forecastFragmentCallbacks.onListItemClicked(WeatherContract.WeatherEntry.buildWeatherLocationWithDate(mLocation, date));
+                    }
+                }
+            }
+        },mTvEmpty);
         this.mForecastAdapter.setUseTodayLayout(mUseTodayLayout);
         this.mCursorLoader = getLoaderManager().initLoader(FORECAST_LOADER,null,this);
         this.lvForecast.setAdapter(mForecastAdapter);
@@ -133,7 +146,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (mPosition != ListView.INVALID_POSITION) {
+        if (mPosition != RecyclerView.NO_POSITION) {
             outState.putInt(SAVE_SCROLL_POSITION,mPosition);
         }
     }
@@ -141,7 +154,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     private void loadDatas() {
         //String location = Utility.getPreferredLocation(getActivity());
         //new FetchWeatherTask(getActivity()).execute(location);
-        if (mForecastAdapter!=null&&mForecastAdapter.getCount()==0){
+        if (mForecastAdapter!=null&&mForecastAdapter.getItemCount()==0){
             SunshineSyncAdapter.syncImmediately(getActivity());
         }
     }
@@ -214,7 +227,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             }
         }
         mForecastAdapter.swapCursor(data);
-        if (mPosition != ListView.INVALID_POSITION) {
+        if (mPosition != RecyclerView.NO_POSITION) {
             // If we don't need to restart the loader, and there's a desired position to restore
             // to, do so now.
             lvForecast.smoothScrollToPosition(mPosition);
