@@ -9,6 +9,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -150,9 +152,10 @@ public class MainActivity extends AppCompatActivity implements ForecastFragmentC
                     .replace(R.id.weather_detail_container, fragment, DETAILFRAGMENT_TAG)
                     .commit();
         }else{
+            ActivityOptionsCompat activityOptions = ActivityOptionsCompat.makeSceneTransitionAnimation(this);
             Intent intent = new Intent(this, DetailActivity.class)
                     .setData(clickedUri);
-            startActivity(intent);
+            ActivityCompat.startActivity(this,intent,activityOptions.toBundle());
         }
     }
     

@@ -71,6 +71,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     private String mLocation;
     private boolean mUseTodayLayout = false;
     private TextView mTvEmpty;
+    private View mParallaxBar;
 
     public ForecastFragment() {
     }
@@ -88,29 +89,17 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         View v =  inflater.inflate(R.layout.fragment_main, container, false);
         this.lvForecast = ((RecyclerView)v.findViewById(R.id.listview_forecast));
         this.mTvEmpty = (TextView)v.findViewById(R.id.tvEmpty);
+        this.mParallaxBar = v.findViewById(R.id.parallax_bar);
         this.lvForecast.setLayoutManager(new LinearLayoutManager(getActivity()));
-        /*this.lvForecast.setEmptyView(mTvEmpty);
-        this.lvForecast.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        this.lvForecast.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (mForecastAdapter!=null){
-                    mPosition = position;
-                    // CursorAdapter returns a cursor at the correct position for getItem(), or null
-                    // if it cannot seek to that position.
-                    Cursor cursor = (Cursor) parent.getItemAtPosition(position);
-                    if (cursor != null) {
-                        if (getActivity() instanceof ForecastFragmentCallbacks){
-                            ForecastFragmentCallbacks forecastFragmentCallbacks = (ForecastFragmentCallbacks)getActivity();
-                            forecastFragmentCallbacks.onListItemClicked(WeatherContract.WeatherEntry.buildWeatherLocationWithDate(mLocation, cursor.getLong(COL_WEATHER_DATE)));
-                        }
-                    }
-                    //Intent i = new Intent(getActivity(),DetailActivity.class);
-                    //i.putExtra(Intent.EXTRA_TEXT,mForecastAdapter.getItem(position));
-                    //startActivity(i);
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (mParallaxBar!=null){
+                    mParallaxBar.setTranslationY(mParallaxBar.getTranslationY()+0.5f*-dy);
                 }
             }
         });
-                */
         // If there's instance state, mine it for useful information.
         // The end-goal here is that the user never knows that turning their device sideways
         // does crazy lifecycle related things.  It should feel like some stuff stretched out,
@@ -122,6 +111,12 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             mPosition = savedInstanceState.getInt(SAVE_SCROLL_POSITION);
         }
         return v;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        this.lvForecast.clearOnScrollListeners();
     }
 
     @Override

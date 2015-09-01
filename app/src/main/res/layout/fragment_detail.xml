@@ -15,6 +15,7 @@
     <!-- Main content: high, low, art, weather state -->
     <include layout="@layout/detail_layout_grid_others"
         android:layout_width="match_parent"
+        android:id="@+id/details_humidity"
         android:layout_height="0dp"
         android:layout_weight="2"/>
 </LinearLayout>
