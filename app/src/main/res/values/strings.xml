@@ -13,6 +13,7 @@
     <string name="action_set_location">View location</string>
     <string name="pref_units_metric">qsdqf</string>
     <string name="pref_units_imperial">qsdfqsd</string>
+    <string name="transition_ico_forecast">IcoForecastTransition</string>
 
     <!-- Date label when displaying today's weather forecast [CHAR LIMIT=20] -->
     <string name="today">Today</string>

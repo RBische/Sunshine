@@ -1,8 +1,10 @@
 package fr.bischof.raphael.sunshine;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -15,6 +17,7 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -22,6 +25,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.TextView;
 
@@ -72,6 +77,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     private boolean mUseTodayLayout = false;
     private TextView mTvEmpty;
     private View mParallaxBar;
+    private boolean mHoldForTransition;
 
     public ForecastFragment() {
     }
@@ -120,6 +126,15 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     @Override
+    public void onInflate(Activity activity, AttributeSet attrs, Bundle savedInstanceState) {
+        super.onInflate(activity, attrs, savedInstanceState);
+        TypedArray a = activity.obtainStyledAttributes(attrs, R.styleable.ForecastFragment,
+                0, 0);
+        mHoldForTransition = a.getBoolean(R.styleable.ForecastFragment_sharedElementTransitions, false);
+        a.recycle();
+    }
+
+    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         this.mForecastAdapter = new ForecastAdapter(getActivity(), new ForecastAdapter.ForecastAdapterOnClickHandler() {
@@ -128,7 +143,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
                 if (mForecastAdapter!=null){
                     if (getActivity() instanceof ForecastFragmentCallbacks){
                         ForecastFragmentCallbacks forecastFragmentCallbacks = (ForecastFragmentCallbacks)getActivity();
-                        forecastFragmentCallbacks.onListItemClicked(WeatherContract.WeatherEntry.buildWeatherLocationWithDate(mLocation, date));
+                        forecastFragmentCallbacks.onListItemClicked(WeatherContract.WeatherEntry.buildWeatherLocationWithDate(mLocation, date),vh);
                     }
                 }
             }
@@ -136,6 +151,12 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         this.mForecastAdapter.setUseTodayLayout(mUseTodayLayout);
         this.mCursorLoader = getLoaderManager().initLoader(FORECAST_LOADER,null,this);
         this.lvForecast.setAdapter(mForecastAdapter);
+        // We hold for transition here just in-case the activity
+        // needs to be re-created. In a standard return transition,
+        // this doesn't actually make a difference.
+        if ( mHoldForTransition ) {
+            getActivity().supportPostponeEnterTransition();
+        }
     }
 
     @Override
@@ -228,6 +249,24 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             lvForecast.smoothScrollToPosition(mPosition);
         }
         loadDatas();
+        if ( data.getCount() == 0 ) {
+            getActivity().supportStartPostponedEnterTransition();
+        } else {
+            lvForecast.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                @Override
+                public boolean onPreDraw() {
+                    // Since we know we're going to get items, we keep the listener around until
+                    // we see Children.
+                    if (lvForecast.getChildCount() > 0) {
+                        if ( mHoldForTransition ) {
+                            getActivity().supportStartPostponedEnterTransition();
+                        }
+                        return true;
+                    }
+                    return false;
+                }
+            });
+        }
     }
 
     @Override

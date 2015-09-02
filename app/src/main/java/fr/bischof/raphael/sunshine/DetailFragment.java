@@ -9,6 +9,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
@@ -33,13 +34,14 @@ import fr.bischof.raphael.sunshine.data.WeatherContract;
 public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String LOG_TAG = DetailFragment.class.getSimpleName();
-
+    static final String DETAIL_TRANSITION_ANIMATION = "DTA";
     private static final String FORECAST_SHARE_HASHTAG = " #SunshineApp";
     private static final int FORECAST_LOADER = 101;
     static final String DETAIL_URI = "URI";
     private String mForecastStr;
     private ShareActionProvider mShareActionProvider;
 
+    private boolean mTransitionAnimation;
 
     private ImageView mIconView;
     private TextView mDateView;
@@ -78,6 +80,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         Bundle arguments = getArguments();
         if (arguments != null) {
             mForecastStr = arguments.getParcelable(DetailFragment.DETAIL_URI).toString();
+            mTransitionAnimation = arguments.getBoolean(DetailFragment.DETAIL_TRANSITION_ANIMATION, false);
         }
 
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
@@ -201,6 +204,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             // If onCreateOptionsMenu has already happened, we need to update the share intent now.
             if (mShareActionProvider != null) {
                 mShareActionProvider.setShareIntent(createShareForecastIntent(mForecastStr));
+            }
+
+            AppCompatActivity activity = (AppCompatActivity)getActivity();
+            if ( mTransitionAnimation ) {
+                activity.supportStartPostponedEnterTransition();
             }
         }
     }

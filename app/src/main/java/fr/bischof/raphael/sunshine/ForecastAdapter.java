@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.preference.PreferenceManager;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -55,6 +56,8 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ViewHo
 
         View view = LayoutInflater.from(mContext).inflate(layoutId, viewGroup, false);
         ViewHolder viewHolder = new ViewHolder(view);
+
+        ViewCompat.setTransitionName(view,mContext.getString(R.string.transition_ico_forecast));
         return viewHolder;
     }
 

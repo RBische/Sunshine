@@ -25,11 +25,13 @@ public class DetailActivity extends AppCompatActivity {
             Intent intent = getIntent();
             if (intent != null) {
                 Bundle args = new Bundle();
+                args.putBoolean(DetailFragment.DETAIL_TRANSITION_ANIMATION, true);
                 args.putParcelable(DetailFragment.DETAIL_URI, intent.getData());
                 DetailFragment fragment = new DetailFragment();
                 fragment.setArguments(args);
                 getSupportFragmentManager().beginTransaction()
                         .add(R.id.fragment, fragment).commit();
+                supportPostponeEnterTransition();
             }
 
         }
